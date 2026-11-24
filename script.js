@@ -44,12 +44,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // AUTOMATIC FOOTER YEAR
     const currentYearEl = document.getElementById("currentYear");
     if (currentYearEl) {
-        currentYearEl.textContent = new Date().getFullYear();
+        currentYearEl.textContent = String(new Date().getFullYear());
     }
 
     // WHATSAPP QUOTATION FORM
     const quoteForm = document.getElementById("quoteForm");
-    // Replace with the target WhatsApp number including country code (e.g., 919819081322 or 918080053786)
+    // Target WhatsApp number including country code (91 for India)
     const whatsappNumber = "918080053786";
 
     if (quoteForm) {
@@ -57,14 +57,22 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
 
             const name = document.getElementById("customerName")?.value.trim() || "";
-            const phone = document.getElementById("customerPhone")?.value.trim() || "";
+            const rawPhone = document.getElementById("customerPhone")?.value.trim() || "";
             const pickup = document.getElementById("pickup")?.value.trim() || "";
             const destination = document.getElementById("destination")?.value.trim() || "";
             const goods = document.getElementById("goods")?.value.trim() || "";
             const message = document.getElementById("message")?.value.trim() || "";
 
-            if (!/^[0-9]{10}$/.test(phone)) {
-                alert("Please enter a valid 10-digit mobile number.");
+            // Normalize digits: strip spaces/dashes, remove leading 91 (if 12 digits) or leading 0
+            let digitsOnly = rawPhone.replace(/\D/g, "");
+            if (digitsOnly.length === 12 && digitsOnly.startsWith("91")) {
+                digitsOnly = digitsOnly.slice(2);
+            } else if (digitsOnly.length === 11 && digitsOnly.startsWith("0")) {
+                digitsOnly = digitsOnly.slice(1);
+            }
+
+            if (!/^[6-9][0-9]{9}$/.test(digitsOnly)) {
+                alert("Please enter a valid 10-digit Indian mobile number.");
                 return;
             }
 
@@ -72,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "NEW TRANSPORTATION ENQUIRY\n\n" +
                 "Company: DURVESH CARRIERS\n\n" +
                 "Customer Name: " + name + "\n" +
-                "Customer Phone: " + phone + "\n" +
+                "Customer Phone: +91 " + digitsOnly + "\n" +
                 "Pickup Location: " + pickup + "\n" +
                 "Destination: " + destination + "\n" +
                 "Cargo Details: " + goods + "\n" +
@@ -84,7 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "?text=" +
                 encodeURIComponent(whatsappMessage);
 
-            window.open(whatsappURL, "_blank", "noopener,noreferrer");
+            window.location.href = whatsappURL;
         });
     }
 
@@ -113,7 +121,6 @@ document.addEventListener("DOMContentLoaded", function () {
             revealObserver.observe(element);
         });
     } else {
-        // Fallback if IntersectionObserver is unsupported
         revealElements.forEach(function (element) {
             element.classList.add("visible");
         });
